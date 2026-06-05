@@ -1210,9 +1210,9 @@ MonoBehaviour:
   initialRatio: 0
   minRatio: 0
   maxRatio: 0
-  initialStepSize: 150
-  finalStepSize: 1
-  reversalsToReduceStep: 4
+  initialStepSize: 0
+  finalStepSize: 0
+  reversalsToReduceStep: 0
   currentRatio: 0
   Screen: {fileID: 1783951019}
 --- !u!1 &738620140

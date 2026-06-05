@@ -34,14 +34,14 @@ public class AdaptiveStaircase : MonoBehaviour
 
     [Header("Staircase Configuration")]
     public StaircaseType staircaseType = StaircaseType.TwoUpOneDown;
-    
-    public float initialRatio; 
-    
+
+    public float initialRatio;
+
     public float minRatio;
-    
+
     public float maxRatio;
 
-    [Header("Step Sizes (ms)")]
+    [Header("Step Sizes (Ratio Change)")]
     public float initialStepSize;   // as pcnt, e.g. 0.50 = 50%
     public float finalStepSize;      // as pcnt, e.g. 0.95 = 95% (must be below 1 to play tone)
     public int reversalsToReduceStep; // After how many reversals to halve step size
@@ -58,7 +58,9 @@ public class AdaptiveStaircase : MonoBehaviour
     private class StaircaseState
     {
         public string conditionLabel;
-        public float currentIntensity; // amp
+
+        // public float currentIntensity; // amp. now using currentRatio instead.
+        public float currentRatio;
         public float currentStepSize;
         public int trialCount;
         public int reversalCount;
@@ -72,7 +74,7 @@ public class AdaptiveStaircase : MonoBehaviour
         public List<float> reversalIntensities = new List<float>();
         public List<int> reversalTrials = new List<int>();
         public bool lastDirectionWasUp;
-        public bool hasHadFirstReversal;
+        public bool hasEstablishedDirection; // true after the first step is taken (not on first reversal)
     }
 
     // Dictionary of independent staircases, keyed by condition label
@@ -81,15 +83,18 @@ public class AdaptiveStaircase : MonoBehaviour
     public GameObject Screen;
     MakeAuditoryStimulus makeAuditoryStimulus;
     // establish defauly parameters from other scripts.
-    
+
     void Start()
     {
-        makeAuditoryStimulus= Screen.GetComponent<MakeAuditoryStimulus>();
+        makeAuditoryStimulus = Screen.GetComponent<MakeAuditoryStimulus>();
 
         initialRatio = makeAuditoryStimulus.initialRatio;  // starting Weber ratio (e.g. 0.25)
-        minRatio     = makeAuditoryStimulus.minRatio;
-        maxRatio     = makeAuditoryStimulus.maxRatio;
-        currentRatio = initialRatio; // to be adapted.
+        minRatio = makeAuditoryStimulus.minRatio;
+        maxRatio = makeAuditoryStimulus.maxRatio;
+        currentRatio = makeAuditoryStimulus.initialRatio; // to be adapted.
+        initialStepSize = .10f;//  makeAuditoryStimulus.initialStepSize; // e.g. 0.50 (50% change)
+        finalStepSize = .01f;
+        reversalsToReduceStep = 2;//makeAuditoryStimulus.reversalsToReduceStep; // e.g. 2   
     }
     // ──────────────────────────────────────────────────────────────────
     //  Public API
@@ -109,15 +114,15 @@ public class AdaptiveStaircase : MonoBehaviour
         if (s.isComplete)
         {
             Debug.LogWarning($"Staircase [{condition}] is already complete!");
-            return s.currentIntensity;
+            return s.currentRatio;
         }
 
         // Record the response
         s.trialCount++;
         s.responseHistory.Add(correct);
-        s.intensityHistory.Add(s.currentIntensity);
+        s.intensityHistory.Add(s.currentRatio);
 
-        Debug.Log($"[Staircase:{condition}] Trial {s.trialCount}: correct={correct}, intensity={s.currentIntensity:F3}");
+        Debug.Log($"[Staircase:{condition}] Trial {s.trialCount}: correct={correct}, ratio={s.currentRatio:F3}");
 
         // Update consecutive counters
         if (correct)
@@ -141,15 +146,17 @@ public class AdaptiveStaircase : MonoBehaviour
         // Update intensity
         if (shouldGoUp)
         {
-            s.currentIntensity += s.currentStepSize;
+            s.currentRatio += s.currentStepSize;
             s.lastDirectionWasUp = true;
+            s.hasEstablishedDirection = true;
             s.consecutiveCorrect = 0;
             s.consecutiveIncorrect = 0;
         }
         else if (shouldGoDown)
         {
-            s.currentIntensity -= s.currentStepSize;
+            s.currentRatio -= s.currentStepSize;
             s.lastDirectionWasUp = false;
+            s.hasEstablishedDirection = true;
             s.consecutiveCorrect = 0;
             s.consecutiveIncorrect = 0;
         }
@@ -158,11 +165,10 @@ public class AdaptiveStaircase : MonoBehaviour
         if (isReversal)
         {
             s.reversalCount++;
-            s.reversalIntensities.Add(s.currentIntensity);
+            s.reversalIntensities.Add(s.currentRatio);
             s.reversalTrials.Add(s.trialCount);
-            s.hasHadFirstReversal = true;
 
-            Debug.Log($"[Staircase:{condition}] Reversal #{s.reversalCount} at trial {s.trialCount}, intensity {s.currentIntensity:F3}");
+            Debug.Log($"[Staircase:{condition}] Reversal #{s.reversalCount} at trial {s.trialCount}, intensity {s.currentRatio:F3}");
 
             // Reduce step size after every N reversals
             if (s.reversalCount > 0 && s.reversalCount % reversalsToReduceStep == 0)
@@ -174,14 +180,14 @@ public class AdaptiveStaircase : MonoBehaviour
         }
 
         // Clamp
-        s.currentIntensity = Mathf.Clamp(s.currentIntensity, minRatio, maxRatio);
+        s.currentRatio = Mathf.Clamp(s.currentRatio, minRatio, maxRatio);
 
-        Debug.Log($"[Staircase:{condition}] New intensity: {s.currentIntensity:F3}, reversals: {s.reversalCount}");
+        Debug.Log($"[Staircase:{condition}] New intensity: {s.currentRatio:F3}, reversals: {s.reversalCount}");
 
         // display in inspector for debugging;
-        currentRatio = s.currentIntensity;
-        
-        return s.currentIntensity;
+        currentRatio = s.currentRatio;
+
+        return s.currentRatio;
     }
 
     /// <summary>
@@ -190,7 +196,7 @@ public class AdaptiveStaircase : MonoBehaviour
     public float GetCurrentIntensity(string condition)
     {
         StaircaseState s = GetOrCreateStaircase(condition);
-        return s.currentIntensity;
+        return s.currentRatio;
     }
 
     /// <summary>
@@ -277,9 +283,9 @@ public class AdaptiveStaircase : MonoBehaviour
                 : 0f;
 
             Debug.Log($"[{kvp.Key}] Trials: {s.trialCount}, Reversals: {s.reversalCount}, " +
-                      $"Final: {s.currentIntensity:F3}, Threshold: {CalculateThreshold(s):F3}, " +
+                      $"Final: {s.currentRatio:F3}, Threshold: {CalculateThreshold(s):F3}, " +
                       $"Accuracy: {accuracy:F1}%");
-            Debug.Log($"  Reversal intensities: {string.Join(", ", s.reversalIntensities.Select(r => r.ToString("F3")))}");
+            Debug.Log($"  Reversal ratios: {string.Join(", ", s.reversalIntensities.Select(r => r.ToString("F3")))}");
         }
     }
 
@@ -302,7 +308,7 @@ public class AdaptiveStaircase : MonoBehaviour
             s = new StaircaseState
             {
                 conditionLabel = condition,
-                currentIntensity = initialRatio,
+                currentRatio = initialRatio,
                 currentStepSize = initialStepSize,
                 trialCount = 0,
                 reversalCount = 0,
@@ -310,7 +316,7 @@ public class AdaptiveStaircase : MonoBehaviour
                 consecutiveIncorrect = 0,
                 isComplete = false,
                 lastDirectionWasUp = false,
-                hasHadFirstReversal = false
+                hasEstablishedDirection = false
             };
             staircases[condition] = s;
             Debug.Log($"[Staircase:{condition}] Created new instance (initial={initialRatio:F3}, step={initialStepSize:F3})");
@@ -358,23 +364,17 @@ public class AdaptiveStaircase : MonoBehaviour
 
     private bool CheckForReversal(StaircaseState s, bool shouldGoUp, bool shouldGoDown)
     {
-        if (!s.hasHadFirstReversal)
-        {
-            // First direction change counts as a reversal
-            return shouldGoUp || shouldGoDown;
-        }
-        else
-        {
-            // Subsequent reversals: direction must flip
-            return (shouldGoUp && !s.lastDirectionWasUp) || (shouldGoDown && s.lastDirectionWasUp);
-        }
+        if (!s.hasEstablishedDirection)
+            return false; // no direction yet — first step can't be a reversal
+
+        return (shouldGoUp && !s.lastDirectionWasUp) || (shouldGoDown && s.lastDirectionWasUp);
     }
 
     private float CalculateThreshold(StaircaseState s)
     {
         if (s.reversalIntensities.Count < 4)
         {
-            return s.currentIntensity; // Not enough data
+            return s.currentRatio; // Not enough data
         }
 
         // Use last 6 reversals or all if fewer than 6

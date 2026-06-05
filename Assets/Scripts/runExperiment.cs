@@ -235,12 +235,12 @@ public class runExperiment : MonoBehaviour
         // Update staircase (skip during standing-still practice trials)
         if (trialCount >= expParams.nstandingStilltrials)
         {
-            string condition = GetConditionLabel(expParams.trialD.blockType, evt.isShorter);
+            string condition = GetConditionLabel(expParams.trialD.blockType);
 
             if (condition != null)
             {
                 float nextDelta = adaptiveStaircase.ProcessResponse(condition, isCorrect);
-                makeAuditoryStimulus.SetRatio(nextDelta, evt.isShorter);
+                makeAuditoryStimulus.SetRatio(nextDelta);
 
                 Debug.Log($"[Staircase:{condition}] {(isCorrect ? "✓" : "✗")} → Next delta: {nextDelta:F1}ms");
             }
@@ -269,12 +269,12 @@ public class runExperiment : MonoBehaviour
 
         if (trialCount >= expParams.nstandingStilltrials)
         {
-            string condition = GetConditionLabel(expParams.trialD.blockType, evt.isShorter);
+            string condition = GetConditionLabel(expParams.trialD.blockType);
 
             if (condition != null)
             {
                 float nextDelta = adaptiveStaircase.ProcessResponse(condition, false);
-                makeAuditoryStimulus.SetRatio(nextDelta, evt.isShorter);
+                makeAuditoryStimulus.SetRatio(nextDelta);
 
                 Debug.Log($"[Staircase:{condition}] ✗ (miss) → Next delta: {nextDelta:F1}ms");
             }
@@ -436,14 +436,13 @@ public class runExperiment : MonoBehaviour
     ///
     /// Returns null for blockType 0 in Mode A (those are practice-only stationary trials).
     /// </summary>
-    string GetConditionLabel(int blockType, bool isShorter)
+    string GetConditionLabel(int blockType)
     {
-        string dir = isShorter ? "shorter" : "longer";
         switch (blockType)
         {
-            case 0: return expParams.stationaryVsNatural ? $"stationary_{dir}" : null;
-            case 1: return $"slow_{dir}";
-            case 2: return $"natural_{dir}";
+            case 0: return expParams.stationaryVsNatural ? "stationary" : null;
+            case 1: return "slow";
+            case 2: return "natural";
             default: return null;
         }
     }

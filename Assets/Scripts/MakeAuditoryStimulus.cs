@@ -57,8 +57,7 @@ public class MakeAuditoryStimulus : MonoBehaviour
     {
         public float toneFrequencyHz;
         public float standardDurationMs;
-        public float currentRatioShorter;     // staircase-controlled Weber ratio for shorter comparisons
-        public float currentRatioLonger;      // staircase-controlled Weber ratio for longer comparisons
+        public float currentRatio;            // staircase-controlled Weber ratio (shared for shorter and longer)
         public bool isShorter;                // this trial: comparison is shorter than standard?
         public float comparisonDurationMs;    // actual comparison duration played this trial
         public float ratio;                   // ratio used this trial (for logging)
@@ -83,6 +82,15 @@ public class MakeAuditoryStimulus : MonoBehaviour
     //  Lifecycle
     // ──────────────────────────────────────────────────────────────────
 
+    void Awake()
+    {
+        // Ratio fields must be set in Awake so they are readable by AdaptiveStaircase.Start()
+        // (script execution order is not guaranteed between Start() calls).
+        initialRatio = 0.55f;   // 55% change to start
+        minRatio     = 0.01f;   // 1% minimum (very fine discrimination)
+        maxRatio     = 0.90f;   // 90% maximum (keeps shorter tone > 0 ms)
+    }
+
     void Start()
     {
         experimentParameters = scriptHolder.GetComponent<experimentParameters>();
@@ -94,26 +102,22 @@ public class MakeAuditoryStimulus : MonoBehaviour
         audioSource.spatialBlend = 0f;
 
         // Set defaults
-        toneFrequencyHz              = 500f;
-        standardDurationMs           = 100f;
-        toneAmplitude                = 0.8f;
-        rampDurationMs               = 15f;
-        standardRepetitions          = 5;
-        standardGapMs                = 300f;
-        initialRatio       = 0.55f;   // 55% change to start
-        minRatio           = 0.01f;   // 1% minimum (very fine discrimination)
-        maxRatio           = 0.90f;   // 90% maximum (keeps shorter tone > 0 ms)
+        toneFrequencyHz    = 500f;
+        standardDurationMs = 100f;
+        toneAmplitude      = 0.8f;
+        rampDurationMs     = 15f;
+        standardRepetitions = 5;
+        standardGapMs      = 300f;
         detectionWindowSec = experimentParameters.responseWindow;
 
         // Pre-generate standard clip (reused every trial)
         standardClip = GenerateToneClip(standardDurationMs / 1000f, toneFrequencyHz, toneAmplitude);
 
         // Initialise state
-        trialState.toneFrequencyHz       = toneFrequencyHz;
-        trialState.standardDurationMs    = standardDurationMs;
-        trialState.currentRatioShorter = initialRatio;
-        trialState.currentRatioLonger  = initialRatio;
-        trialState.changeCount         = 0;
+        trialState.toneFrequencyHz    = toneFrequencyHz;
+        trialState.standardDurationMs = standardDurationMs;
+        trialState.currentRatio       = initialRatio;
+        trialState.changeCount        = 0;
 
         Debug.Log($"MakeAuditoryStimulus: standard={standardDurationMs}ms @ {toneFrequencyHz}Hz, " +
                   $"initialRatio={initialRatio:P0}, ramp={rampDurationMs}ms");
@@ -159,10 +163,7 @@ public class MakeAuditoryStimulus : MonoBehaviour
         // ── Choose direction and compute comparison duration (ratio-based) ──
         trialState.isShorter = Random.Range(0f, 1f) < 0.5f;
 
-        float ratio = trialState.isShorter
-            ? trialState.currentRatioShorter
-            : trialState.currentRatioLonger;
-        ratio = Mathf.Clamp(ratio, minRatio, maxRatio);
+        float ratio = Mathf.Clamp(trialState.currentRatio, minRatio, maxRatio);
 
         // Weber-fraction scaling:
         //   longer  = standard × (1 + ratio)
@@ -233,20 +234,12 @@ public class MakeAuditoryStimulus : MonoBehaviour
     /// Updates the staircase-controlled Weber ratio for the given direction.
     /// Called by runExperiment after each response.
     /// </summary>
-    public void SetRatio(float ratio, bool isShorter)
+    public void SetRatio(float ratio)
     {
-        if (isShorter)
-        {
-            trialState.currentRatioShorter = Mathf.Clamp(ratio, minRatio, maxRatio);
-            Debug.Log($"[CompTrial] Shorter ratio → {trialState.currentRatioShorter:P1}  " +
-                      $"({standardDurationMs * (1f - trialState.currentRatioShorter):F1}ms)");
-        }
-        else
-        {
-            trialState.currentRatioLonger = Mathf.Clamp(ratio, minRatio, maxRatio);
-            Debug.Log($"[CompTrial] Longer ratio  → {trialState.currentRatioLonger:P1}  " +
-                      $"({standardDurationMs * (1f + trialState.currentRatioLonger):F1}ms)");
-        }
+        trialState.currentRatio = Mathf.Clamp(ratio, minRatio, maxRatio);
+        Debug.Log($"[CompTrial] Ratio → {trialState.currentRatio:P1}  " +
+                  $"(shorter: {standardDurationMs * (1f - trialState.currentRatio):F1}ms, " +
+                  $"longer: {standardDurationMs * (1f + trialState.currentRatio):F1}ms)");
     }
 
     // ──────────────────────────────────────────────────────────────────
