@@ -247,7 +247,7 @@ public class RecordData : MonoBehaviour
            "toneFrequencyHz," +
            "standardDurationMs," +
            "ratio," +
-           "deltaMs," +
+           "comparisonDurationMs," +
            "isShorter," +
            "changeOnsetTime," +
            "clickOnsetTime," +
@@ -266,7 +266,7 @@ public class RecordData : MonoBehaviour
     // Receives the immutable StimulusEvent snapshot.
     //
     // Data sources:
-    //   evt            → stimulus properties (toneFrequencyHz, standardDurationMs, deltaMs, isShorter, changeOnsetTime, changeIndex)
+    //   evt            → stimulus properties (toneFrequencyHz, standardDurationMs, comparisonDurationMs, isShorter, changeOnsetTime, changeIndex)
     //   trialD         → trial context and response (targCorrect, targResponse, clickOnsetTime)
     //   runExperiment  → session-level info (participant, trialCount, responseMap)
     public void extractEventSummary(experimentParameters.StimulusEvent evt, bool isFalseAlarm)
@@ -287,7 +287,7 @@ public class RecordData : MonoBehaviour
                   evt.toneFrequencyHz + "," +
                   evt.standardDurationMs + "," +
                   evt.ratio + "," +
-                  evt.deltaMs + "," +        // derived: standardDurationMs × ratio
+                  evt.comparisonDurationMs + "," +        // derived: standardDurationMs × ratio
                   (evt.isShorter ? 1 : 0) + "," +                          // 1=shorter, 0=longer
                   evt.changeOnsetTime + "," +
                   experimentParameters.trialD.clickOnsetTime + "," +

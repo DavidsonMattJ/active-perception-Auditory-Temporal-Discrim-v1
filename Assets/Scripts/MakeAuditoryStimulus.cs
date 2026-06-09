@@ -162,7 +162,7 @@ public class MakeAuditoryStimulus : MonoBehaviour
 
         // ── Choose direction and compute comparison duration (ratio-based) ──
         trialState.isShorter = Random.Range(0f, 1f) < 0.5f;
-
+        
         float ratio = Mathf.Clamp(trialState.currentRatio, minRatio, maxRatio);
 
         // Weber-fraction scaling:
@@ -181,10 +181,13 @@ public class MakeAuditoryStimulus : MonoBehaviour
         var evt = new experimentParameters.StimulusEvent(
             toneFrequencyHz:    toneFrequencyHz,
             standardDurationMs: standardDurationMs,
-            ratio:              ratio,
+            ratio:              trialState.ratio,
+            comparisonDurationMs: trialState.comparisonDurationMs,
             isShorter:          trialState.isShorter,
             changeOnsetTime:    trialState.changeOnsetTime,
             changeIndex:        trialState.changeCount - 1
+            
+            
         );
 
         // ── Play comparison tone ─────────────────────────────────────

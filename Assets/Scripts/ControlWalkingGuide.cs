@@ -141,8 +141,8 @@ public class controlWalkingGuide : MonoBehaviour
             }
         }
 
-        // we can also calculate next trial speed here if needed.
-        nextSpeedIndex = expParams.blockTypeArray[nextTrialIndex, 2]; // speed index for next trial. [ 0,1,2] = [stationary, slow, normal];
+        // we can also show next trial speed here if needed.
+    
         Debug.Log("next speed index is: " + nextSpeedIndex);
 
     }

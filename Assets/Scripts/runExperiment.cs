@@ -297,6 +297,7 @@ public class runExperiment : MonoBehaviour
             toneFrequencyHz:    makeAuditoryStimulus.trialState.toneFrequencyHz,
             standardDurationMs: makeAuditoryStimulus.trialState.standardDurationMs,
             ratio:            0f,
+            comparisonDurationMs: makeAuditoryStimulus.trialState.comparisonDurationMs,
             isShorter:          false,
             changeOnsetTime:    trialTime,
             changeIndex:        -1  // sentinel: false alarm, no comparison played yet

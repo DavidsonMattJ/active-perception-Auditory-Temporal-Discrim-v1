@@ -64,22 +64,24 @@ public class experimentParameters : MonoBehaviour
     {
         public readonly float toneFrequencyHz;      // Tone frequency (Hz)
         public readonly float standardDurationMs;   // Reference tone duration (ms)
+        
         public readonly float ratio;                // Weber fraction applied (e.g. 0.25 = 25%)
-        // public readonly float deltaMs;                // Weber fraction applied (e.g. 0.25 = 25%)
+        public readonly float comparisonDurationMs; // comparison tone after ratio applied
         public readonly bool isShorter;             // Was comparison shorter than standard?
         public readonly float changeOnsetTime;      // Trial-relative time (seconds) when comparison was played
         public readonly int changeIndex;            // Which comparison in this trial (0-based)
 
         // Derived convenience property — actual ms difference for logging
-        public float deltaMs => standardDurationMs * ratio;
+        public float toneMs => standardDurationMs * ratio;
 
         public StimulusEvent(
             float toneFrequencyHz, float standardDurationMs,
-            float ratio, bool isShorter,
-            float changeOnsetTime, int changeIndex)
+            float ratio, float comparisonDurationMs,  bool isShorter,
+            float changeOnsetTime, int changeIndex )
         {
             this.toneFrequencyHz    = toneFrequencyHz;
             this.standardDurationMs = standardDurationMs;
+            this.comparisonDurationMs = comparisonDurationMs;
             this.ratio              = ratio;
             this.isShorter          = isShorter;
             this.changeOnsetTime    = changeOnsetTime;
@@ -140,7 +142,7 @@ public class experimentParameters : MonoBehaviour
         targDurationsec = 0.3f; // used by CalculateStimTimes for onset scheduling (comparison tone duration + buffer)
         responseWindow = 0.8f; // time to respond after target onset.
         // targDurationsec = 0.4f; // Initial value (start easy) to be updated by staricase.
-        nstandingStilltrials = 2; // ensure mod%2 to not mess with gide positioning.
+        nstandingStilltrials = 4; // ensure mod%2 to not mess with gide positioning.
         
         jittermax = 0.25f; // in seconds, will be a uniform distribution from 0  + jittermax.
         // set colour presets
@@ -218,7 +220,7 @@ public class experimentParameters : MonoBehaviour
         shuffleArray(blockTypelist);
         // now shoehorn in a natural pace block at the start of this array:
 
-        blockTypelist = new[] { 1 }.Concat(blockTypelist).ToArray();
+        blockTypelist = new[] { walktypeArray[1] }.Concat(blockTypelist).ToArray();
 
         blockTypeArray = new int[(int)nTrials, 3];
         // 3 columns. blockiD, trialID (within block), walkspeed
@@ -241,9 +243,15 @@ public class experimentParameters : MonoBehaviour
                 }
                 else if (icounter >= nstandingStilltrials && icounter <= (nstandingStilltrials + 2))
                 {
-                    // Mode A: practice slow walk. Mode B: practice natural (no slow walk in that mode).
+                    // true: practice natural (no slow walk). false: practice slow
                     blockTypeArray[icounter, 2] = stationaryVsNatural ? 2 : 1;
                 }
+
+                // debugging, throw in a stationary to see if walking guide location resets properly.
+                // if (icounter == 11)
+                // {
+                //     blockTypeArray[icounter, 2] = 0;
+                // }
 
                 icounter++;
             }

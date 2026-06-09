@@ -999,7 +999,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playinVR: 0
-  participant: matt-test-full
+  participant: matt-test-stair
   skipWalkCalibration: 1
   responseMapping: L:absent R:present
   trialCount: 0
