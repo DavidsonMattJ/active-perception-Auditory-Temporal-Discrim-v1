@@ -93,7 +93,7 @@ public class AdaptiveStaircase : MonoBehaviour
         maxRatio = makeAuditoryStimulus.maxRatio;
         currentRatio = makeAuditoryStimulus.initialRatio; // to be adapted.
         initialStepSize = .10f;//  makeAuditoryStimulus.initialStepSize; // e.g. 0.50 (50% change)
-        finalStepSize = .01f;
+        finalStepSize = .001f;
         reversalsToReduceStep = 2;//makeAuditoryStimulus.reversalsToReduceStep; // e.g. 2   
     }
     // ──────────────────────────────────────────────────────────────────

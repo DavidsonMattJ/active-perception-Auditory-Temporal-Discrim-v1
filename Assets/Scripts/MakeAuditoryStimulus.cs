@@ -105,7 +105,7 @@ public class MakeAuditoryStimulus : MonoBehaviour
         toneFrequencyHz    = 500f;
         standardDurationMs = 100f;
         toneAmplitude      = 0.8f;
-        rampDurationMs     = 15f;
+        rampDurationMs     = 5f; // needs to be very small, otherwise short tones are inaudible without a ramp (e.g. 10 ms tone with 10 ms ramp = silence)
         standardRepetitions = 3;
         standardGapMs      = 500f;
         detectionWindowSec = experimentParameters.responseWindow;
