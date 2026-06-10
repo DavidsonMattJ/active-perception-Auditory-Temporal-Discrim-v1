@@ -218,7 +218,7 @@ public class experimentParameters : MonoBehaviour
 
 
         shuffleArray(blockTypelist);
-        // now shoehorn in a natural pace block at the start of this array:
+        // now shoehorn in a natural pace block at the start of this array:, final should be [natural, random, random, random ...] with random proportional slow/natural as defined by propSlowSpeed.
 
         blockTypelist = new[] { walktypeArray[1] }.Concat(blockTypelist).ToArray();
 
