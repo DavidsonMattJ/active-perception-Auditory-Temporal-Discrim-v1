@@ -191,7 +191,7 @@ public class CalculateStimTimes : MonoBehaviour
         
 
         // filePath = recDat.outputFolder + runExp.participant + "_" + recDat.startTime + "_stimSchedule.csv";
-        string tmpfilepath = recordData.outputFolder + runExp.participant  + recordData.startTime + "_stimSchedule.csv";
+        string tmpfilepath = recordData.outputFolder + runExp.participant  + "_" + recordData.startTime + "_stimSchedule.csv";
 
         int maxColumns = allOnsets.Max(row => row.Length); // Find longest row
         List<string> lines = new List<string>();

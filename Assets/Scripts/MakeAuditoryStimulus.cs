@@ -106,8 +106,8 @@ public class MakeAuditoryStimulus : MonoBehaviour
         standardDurationMs = 100f;
         toneAmplitude      = 0.8f;
         rampDurationMs     = 15f;
-        standardRepetitions = 5;
-        standardGapMs      = 300f;
+        standardRepetitions = 3;
+        standardGapMs      = 500f;
         detectionWindowSec = experimentParameters.responseWindow;
 
         // Pre-generate standard clip (reused every trial)
