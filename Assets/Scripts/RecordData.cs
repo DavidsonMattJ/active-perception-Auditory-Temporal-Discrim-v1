@@ -17,7 +17,8 @@ public class RecordData : MonoBehaviour
     // updated 2025-05 MD to enable gaze origin and direction recordings.
     // preallocate output file, and folder
     public string outputFile_pos, outputFile_posEye, outputFile_summary, outputFolder;
-    List<string> outputData_pos = new List<string>();
+    private StreamWriter posWriter;
+   
     List<string> outputData_summary = new List<string>();
     public string startTime;
     float data_trialTime;
@@ -37,6 +38,7 @@ public class RecordData : MonoBehaviour
     float trialTime;
     //flow handler:
     
+    private bool dataSaveinprogres;
     string gazeObject;
     string projectName = "Auditory-Single-Stim-v1";
 
@@ -67,7 +69,8 @@ public class RecordData : MonoBehaviour
         Debug.Log("saving to location " + outputFolder);
 
         startTime = System.DateTime.Now.ToString("yyyy-MM-dd-hh-mm");
-        
+        dataSaveinprogres = false; // 
+
 
         // only create if playing in VR. 
         if (runExperiment.playinVR)
@@ -108,6 +111,7 @@ public class RecordData : MonoBehaviour
         
             writeFiletoDisk();
             
+            dataSaveinprogres=false;
             
         }
 
@@ -117,7 +121,7 @@ public class RecordData : MonoBehaviour
 
     public void createPositionTextfile()
     {
-        outputFile_pos = outputFolder + runExperiment.participant  + "_" + startTime + ".csv";
+        outputFile_pos = outputFolder + runExperiment.participant  + "_" + startTime + "_framebyframe.csv";
 
         // Ensure the output directory exists
         string dir = System.IO.Path.GetDirectoryName(outputFile_pos);
@@ -147,6 +151,11 @@ public class RecordData : MonoBehaviour
             "\r\n";
 
         File.WriteAllText(outputFile_pos, columnNamesPos);
+        
+         // Open a persistent StreamWriter in append mode. The header has just been
+        // written above, so all subsequent writes append frame data directly to disk
+        // without buffering in a List<string>.
+        posWriter = new StreamWriter(outputFile_pos, append: true);
 
     }
 
@@ -220,7 +229,7 @@ public class RecordData : MonoBehaviour
                 // pupilDiameter; // average of left and right.
 
 
-        outputData_pos.Add(data);
+        posWriter.WriteLine(data);
 
 
     }
@@ -303,11 +312,10 @@ public class RecordData : MonoBehaviour
 
     public void saveonBlockEnd()
     {
-        saveRecordedDataList(outputFile_pos, outputData_pos);
+        posWriter?.Flush();        
         saveRecordedDataList(outputFile_summary, outputData_summary);
 
         // clear cache
-        outputData_pos = new List<string>();
         outputData_summary = new List<string>();
 
 
@@ -320,35 +328,24 @@ public class RecordData : MonoBehaviour
 
     public void writeFiletoDisk()
     {
-        if (runExperiment.playinVR)
-        { // both
-            saveRecordedDataList(outputFile_pos, outputData_pos);
-            saveRecordedDataList(outputFile_summary, outputData_summary);
-        }
-        else
-        {
-            saveRecordedDataList(outputFile_summary, outputData_summary);
-        }
+        // Flush the position stream to disk (null-safe: posWriter is null in non-VR mode).
+        posWriter?.Flush();
+        saveRecordedDataList(outputFile_summary, outputData_summary);
 
-        // clear cache
-        outputData_pos = new List<string>();
+        // clear summary cache
         outputData_summary = new List<string>();
 
-
+        // Prevent Update() from calling this again until the next trial starts.
+        recordPhase = phase.idle;
 
     }
 
     private void OnApplicationQuit() // for safety.
     {
-        if (runExperiment.playinVR)
-        { // both
-            saveRecordedDataList(outputFile_pos, outputData_pos);
-            saveRecordedDataList(outputFile_summary, outputData_summary);
-        }
-        else
-        {
-            saveRecordedDataList(outputFile_summary, outputData_summary);
-        }
+        posWriter?.Flush();
+        posWriter?.Close();
+        posWriter = null;
+        saveRecordedDataList(outputFile_summary, outputData_summary);
     }
 
     static void saveRecordedDataList(string filePath, List<string> dataList)
