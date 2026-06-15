@@ -288,7 +288,7 @@ public class RecordData : MonoBehaviour
                   System.DateTime.Now.ToString("yyyy-MM-dd") + "," +
                   runExperiment.participant + "," +
                   runExperiment.responseMap + "," +
-                  runExperiment.trialCount + "," +
+                  runExperiment.trialCount + "," + // trialcount seems off in indexing.
                   experimentParameters.trialD.blockID + "," +
                   experimentParameters.trialD.trialID + "," +
                   experimentParameters.trialD.blockType + "," +             // walk speed (0=stat, 1=slow, 2=natural)

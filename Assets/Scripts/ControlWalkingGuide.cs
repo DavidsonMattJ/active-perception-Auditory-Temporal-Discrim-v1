@@ -177,7 +177,7 @@ public class controlWalkingGuide : MonoBehaviour
         Debug.Log("actual Pos: " + walkingGuide.transform.position);
 
         setGuidetoHidden();
-        walkingGuide.transform.DOMove(desiredPos,0.5f).SetEase(Ease.Linear);
+        walkingGuide.transform.DOMove(desiredPos,1.5f).SetEase(Ease.Linear);
         
     }
 

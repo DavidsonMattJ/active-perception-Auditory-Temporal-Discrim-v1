@@ -93,7 +93,7 @@ public class AdaptiveStaircase : MonoBehaviour
         maxRatio = makeAuditoryStimulus.maxRatio;
         currentRatio = makeAuditoryStimulus.initialRatio; // to be adapted.
         initialStepSize = .10f;//  makeAuditoryStimulus.initialStepSize; // e.g. 0.50 (50% change)
-        finalStepSize = .001f;
+        finalStepSize = .01f;
         reversalsToReduceStep = 2;//makeAuditoryStimulus.reversalsToReduceStep; // e.g. 2   
     }
     // ──────────────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ public class AdaptiveStaircase : MonoBehaviour
             if (s.reversalCount > 0 && s.reversalCount % reversalsToReduceStep == 0)
             {
                 float oldStep = s.currentStepSize;
-                s.currentStepSize = Mathf.Max(finalStepSize, s.currentStepSize * 0.5f);
+                s.currentStepSize = Mathf.Max(finalStepSize, s.currentStepSize * 0.75f);
                 Debug.Log($"[Staircase:{condition}] Step size reduced: {oldStep:F3} -> {s.currentStepSize:F3}");
             }
         }
