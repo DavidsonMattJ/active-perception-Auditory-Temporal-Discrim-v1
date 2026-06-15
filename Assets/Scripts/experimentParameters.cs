@@ -181,23 +181,23 @@ public class experimentParameters : MonoBehaviour
         // also create wrapper to determine block conditions.
         // first few trials (or block) should be stationary, for burn-in.
         // this is fixed by adding an extra natural speed block at first index.
-        blockTypelist = new int[nBlocks-nPracticeBlocks]; // shuffle everything after practice.
-
-        // block type determines walking speed,
-        // 1 = slow walk,
-        // 2 = normal walk, 
-
-        // FILL BLOCKS, but we want a lower proportion of slow (to accomodate) for more trials in that condition.
-
         // Mode A (stationaryVsNatural=false): slow walk (1) and natural (2)
         // Mode B (stationaryVsNatural=true):  stationary (0) and natural (2)
         int[] walktypeArray = stationaryVsNatural
             ? new int[] { 0, 2 }
             : new int[] { 1, 2 };
 
-        // Calculate how many blocks should be of each type
-        int nSlowBlocks = Mathf.RoundToInt((nBlocks-nPracticeBlocks) * propSlowSpeed);
-        int nFastBlocks = (nBlocks-nPracticeBlocks) - nSlowBlocks;
+        // One non-practice block is always forced to natural (prepended below), so
+        // allocate nBlocks-nPracticeBlocks-1 slots here. After prepending the forced
+        // natural block the array has exactly nBlocks-nPracticeBlocks entries, one per
+        // non-practice block. Previously allocating nBlocks-nPracticeBlocks here meant
+        // the prepend created an 11-element list from which only 10 were consumed,
+        // silently dropping the last shuffled block and biasing the counts (6 nat / 4 stat).
+        int nRemaining = nBlocks - nPracticeBlocks - 1;
+        blockTypelist = new int[nRemaining];
+
+        int nSlowBlocks = Mathf.RoundToInt(nRemaining * propSlowSpeed);
+        int nFastBlocks = nRemaining - nSlowBlocks;
 
         // Fill the blockTypelist with proportional amounts
         int icount = 0;
@@ -227,35 +227,32 @@ public class experimentParameters : MonoBehaviour
         
         int icounter;
         icounter = 0;
-        // for staircaseblocks:
+        // for practice block: first nstandingStilltrials are stationary burn-in,
+        // then an even shuffle of both walk conditions for the remainder.
         for (int iblock = 0; iblock < nPracticeBlocks; iblock++)
         {
+            int nPracticeWalk = nTrialsperBlock - nstandingStilltrials;
+            int[] practiceWalkTypes = new int[nPracticeWalk];
+            int half = nPracticeWalk / 2;
+            for (int i = 0; i < half; i++)
+                practiceWalkTypes[i] = walktypeArray[0]; // slow or stationary
+            for (int i = half; i < nPracticeWalk; i++)
+                practiceWalkTypes[i] = walktypeArray[1]; // natural
+            shuffleArray(practiceWalkTypes);
+
+            int walkIdx = 0;
             for (int itrial = 0; itrial < nTrialsperBlock; itrial++)
             {
                 blockTypeArray[icounter, 0] = iblock;
-                blockTypeArray[icounter, 1] = itrial; // trial within block                
-                blockTypeArray[icounter, 2] = 2; // normal mvmnt during staircase (except below exceptions)
+                blockTypeArray[icounter, 1] = itrial;
 
-                //// except for first nstanding trials, in which case, we will practice standing still.
                 if (icounter < nstandingStilltrials)
-                {
-                    blockTypeArray[icounter, 2] = 0; // stationary for first nstandingStilltrials.
-                }
-                else if (icounter >= nstandingStilltrials && icounter <= (nstandingStilltrials + 2))
-                {
-                    // true: practice natural (no slow walk). false: practice slow
-                    blockTypeArray[icounter, 2] = stationaryVsNatural ? 2 : 1;
-                }
-
-                // debugging, throw in a stationary to see if walking guide location resets properly.
-                // if (icounter == 11)
-                // {
-                //     blockTypeArray[icounter, 2] = 0;
-                // }
+                    blockTypeArray[icounter, 2] = 0; // stationary burn-in
+                else
+                    blockTypeArray[icounter, 2] = practiceWalkTypes[walkIdx++];
 
                 icounter++;
             }
-
         }
 
         //now fill remaining blocks 
