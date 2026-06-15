@@ -93,10 +93,10 @@ public class controlWalkingGuide : MonoBehaviour
 
     public void SetGuideForNextTrial()
     {
-        // set the walking guide to the next position, based on the current trial type.
-        // if stationary, set to centre.
-        // if moving, set to start or end zone.
-        // based on the next trial speed, adjust the  end zone accordingly.
+        // Kill any active walk tween before repositioning. Without this, a still-running
+        // moveGuideatWalkSpeed() DOMove overrides setGuidetoCentre() on subsequent frames,
+        // leaving the guide at the startZone when the next trial is stationary.
+        walkingGuide.transform.DOKill();
 
         int nextTrialIndex = runExperiment.trialCount + 1; // next trial index;
         

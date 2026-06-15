@@ -128,13 +128,20 @@ public class ShowText : MonoBehaviour
                 "Remember: \n\n " + runExperiment.responseMapping;
                 TextBG.SetActive(true);
             }
-            else if (textType == TextType.Welcome) // update dynamically with response mapping
+            else if (textType == TextType.Welcome)
             {
-                
                 textMesh.text = "Welcome! \n Please listen to your experimenter for instructions. \n\n" +
                                 "Remember: \n\n " + runExperiment.responseMapping;
-                TextBG.SetActive(true); //show background to enhance text.
-            } else
+                TextBG.SetActive(true);
+            }
+            else if (textType == TextType.ExperimentComplete)
+            {
+                textMesh.color = Color.white;
+                textMesh.text = "Experiment complete — thank you!\n\n" +
+                                "Please let the experimenter know you are finished.";
+                TextBG.SetActive(true);
+            }
+            else
             {
                 textMesh.text = textStrings[textType];
                 if (textType == TextType.Hide)

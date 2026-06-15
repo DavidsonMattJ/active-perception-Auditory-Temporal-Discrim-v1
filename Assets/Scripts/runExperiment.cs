@@ -406,27 +406,28 @@ public class runExperiment : MonoBehaviour
 
     void trialPackDown()
     {
-        // This method handles the end of a trial, including data recording and cleanup.
         Debug.Log("End of Trial " + (trialCount + 1));
 
-        // For safety
         RecordData.recordPhase = RecordData.phase.stop;
-        //determine next start position for walking guide.
 
-        controlWalkingGuide.SetGuideForNextTrial(); //uses current trialcount +1 to determine next position.
-
-        // Reset trial state
         trialinProgress = false;
         trialTime = 0f;
-
-        // Stop any playing audio
         makeAuditoryStimulus.StopAllAudio();
 
+        int totalTrials = expParams.nTrialsperBlock * expParams.nBlocks;
+        bool isLastTrial = (trialCount >= totalTrials - 1);
 
-        // Update text screen to show next steps or end of experiment
-        ShowText.UpdateText(ShowText.TextType.TrialStart); //using the previous trial count to show next trial info.
-
-
+        if (isLastTrial)
+        {
+            controlWalkingGuide.setGuidetoCentre();
+            adaptiveStaircase.PrintSummary();
+            ShowText.UpdateText(ShowText.TextType.ExperimentComplete);
+        }
+        else
+        {
+            controlWalkingGuide.SetGuideForNextTrial();
+            ShowText.UpdateText(ShowText.TextType.TrialStart);
+        }
     }
 
     /// <summary>

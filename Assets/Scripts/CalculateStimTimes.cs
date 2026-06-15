@@ -66,7 +66,11 @@ public class CalculateStimTimes : MonoBehaviour
         nTrials = expParams.nTrialsperBlock * expParams.nBlocks;
 
         startBuffer = expParams.preTrialsec;
-        endBuffer = expParams.responseWindow; ;  // symmetric for now
+        // endBuffer must cover stimDur + responseWindow (= seqUnit) so the last onset
+        // always has room for the full tone AND response window before the trial ends.
+        // Using only responseWindow here cut into the stimulus duration, causing late
+        // onsets to run past the trial boundary.
+        endBuffer = seqUnit;
 
         for (int itrial = 0; itrial < nTrials; itrial++)
         {
@@ -104,18 +108,20 @@ public class CalculateStimTimes : MonoBehaviour
             // Apply infill offset to the FIRST onset
             onsets[0] = startBuffer + prejit + infillOffset;
 
+            float latestAllowed = tTotal - seqUnit; // last onset must leave room for tone + full response window
             for (int n = 1; n < nTargs; n++)
             {
-                // Use baseSpacing instead of seqUnit, add random jitter
                 float jitter = Random.Range(0f, jitMax);
                 onsets[n] = onsets[n - 1] + baseSpacing + jitter;
-                
+
                 // Ensure minimum spacing is maintained
                 float minNext = onsets[n - 1] + seqUnit;
                 if (onsets[n] < minNext)
-                {
                     onsets[n] = minNext;
-                }
+
+                // Hard cap: cumulative jitter must never push an onset past the safe boundary
+                if (onsets[n] > latestAllowed)
+                    onsets[n] = latestAllowed;
             }
 
             // // Start Buffer-> prejit-> [stimPres->respWin->j(n)]->End Buffer
