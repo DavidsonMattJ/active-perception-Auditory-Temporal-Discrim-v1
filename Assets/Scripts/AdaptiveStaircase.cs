@@ -174,7 +174,7 @@ public class AdaptiveStaircase : MonoBehaviour
             if (s.reversalCount > 0 && s.reversalCount % reversalsToReduceStep == 0)
             {
                 float oldStep = s.currentStepSize;
-                s.currentStepSize = Mathf.Max(finalStepSize, s.currentStepSize * 0.75f);
+                s.currentStepSize = Mathf.Max(finalStepSize, s.currentStepSize * 0.5f); // reduce by half, but not below finalStepSize
                 Debug.Log($"[Staircase:{condition}] Step size reduced: {oldStep:F3} -> {s.currentStepSize:F3}");
             }
         }
