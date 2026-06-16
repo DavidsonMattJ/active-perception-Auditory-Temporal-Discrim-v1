@@ -999,7 +999,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playinVR: 1
-  participant: p_05
+  participant: p_06
   skipWalkCalibration: 1
   responseMapping: L:absent R:present
   trialCount: 0
