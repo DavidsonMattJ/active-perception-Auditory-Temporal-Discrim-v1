@@ -200,7 +200,7 @@ public class controlWalkingGuide : MonoBehaviour
         Debug.Log("actual Pos: " + walkingGuide.transform.position);
         // walkingGuide.
         setGuidetoHidden();
-        walkingGuide.transform.DOMove(desiredPos, 0.5f).SetEase(Ease.Linear);
+        walkingGuide.transform.DOMove(desiredPos, 1.5f).SetEase(Ease.Linear);
         // or move instantly?
         // need to turn off rigitbody first.
         // walkingGuide.transform.position = desiredPos; 

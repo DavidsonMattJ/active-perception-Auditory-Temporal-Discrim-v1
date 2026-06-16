@@ -238,7 +238,7 @@ public class experimentParameters : MonoBehaviour
                 practiceWalkTypes[i] = walktypeArray[0]; // slow or stationary
             for (int i = half; i < nPracticeWalk; i++)
                 practiceWalkTypes[i] = walktypeArray[1]; // natural
-            shuffleArray(practiceWalkTypes);
+            // shuffleArray(practiceWalkTypes); //removing the shuffle to make it easier.
 
             int walkIdx = 0;
             for (int itrial = 0; itrial < nTrialsperBlock; itrial++)
