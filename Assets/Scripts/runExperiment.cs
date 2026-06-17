@@ -60,12 +60,14 @@ public class runExperiment : MonoBehaviour
     AdaptiveStaircase adaptiveStaircase;
     CalculateStimTimes calculateStimTimes;
     MakeAuditoryStimulus makeAuditoryStimulus;
-
+    ListenText listenText;
 
     //use  serialize field to require drag-drop in inspector. less expensive than GameObject.Find() .
     [SerializeField] GameObject TextScreen;
     [SerializeField] GameObject TextFeedback;
     [SerializeField] GameObject StimulusScreen;
+    [SerializeField] GameObject ListenTextObject;  // assign in Inspector
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -79,7 +81,7 @@ public class runExperiment : MonoBehaviour
         walkCalibrator = GetComponent<WalkSpeedCalibrator>();
         RecordData = GetComponent<RecordData>();
         calculateStimTimes = GetComponent<CalculateStimTimes>();
-
+        listenText = ListenTextObject.GetComponent<ListenText>();
         ShowText = TextScreen.GetComponent<ShowText>();
         FeedbackText = TextFeedback.GetComponent<FeedbackText>();
 
@@ -348,6 +350,7 @@ public class runExperiment : MonoBehaviour
         //remove text
         ShowText.UpdateText(ShowText.TextType.Hide);
         FeedbackText.UpdateText(FeedbackText.TextType.Hide);
+        listenText.Show(responseMapping);
 
         //establish trial parameters:
         if (expParams.maxTargsbySpeed == null)
@@ -413,7 +416,7 @@ public class runExperiment : MonoBehaviour
         trialinProgress = false;
         trialTime = 0f;
         makeAuditoryStimulus.StopAllAudio();
-
+        listenText.Hide();
         int totalTrials = expParams.nTrialsperBlock * expParams.nBlocks;
         bool isLastTrial = (trialCount >= totalTrials - 1);
 

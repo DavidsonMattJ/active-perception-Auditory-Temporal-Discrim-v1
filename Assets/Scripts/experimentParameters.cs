@@ -193,7 +193,7 @@ public class experimentParameters : MonoBehaviour
         // non-practice block. Previously allocating nBlocks-nPracticeBlocks here meant
         // the prepend created an 11-element list from which only 10 were consumed,
         // silently dropping the last shuffled block and biasing the counts (6 nat / 4 stat).
-        int nRemaining = nBlocks - nPracticeBlocks - 1;
+        int nRemaining = nBlocks - nPracticeBlocks;
         blockTypelist = new int[nRemaining];
 
         int nSlowBlocks = Mathf.RoundToInt(nRemaining * propSlowSpeed);
@@ -218,9 +218,9 @@ public class experimentParameters : MonoBehaviour
 
 
         shuffleArray(blockTypelist);
-        // now shoehorn in a natural pace block at the start of this array:, final should be [natural, random, random, random ...] with random proportional slow/natural as defined by propSlowSpeed.
+        // now shoehorn in an extra block at the start of this array: types override below.
 
-        blockTypelist = new[] { walktypeArray[1] }.Concat(blockTypelist).ToArray();
+        blockTypelist = new[] { walktypeArray[0] }.Concat(blockTypelist).ToArray();
 
         blockTypeArray = new int[(int)nTrials, 3];
         // 3 columns. blockiD, trialID (within block), walkspeed
