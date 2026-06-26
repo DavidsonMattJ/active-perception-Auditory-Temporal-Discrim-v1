@@ -34,7 +34,7 @@ public class experimentParameters : MonoBehaviour
     //Within trial parameters:
 
     [HideInInspector]
-    public float preTrialsec, responseWindow, targDurationsec, nTrials, minITI, maxITI, jittermax;
+    public float preTrialsec, responseWindow, targDurationsec, nTrials, minITI, maxITI, jittermax, trialBufferSec;
     
 
     //Experiment Design parameers:
@@ -138,6 +138,7 @@ public class experimentParameters : MonoBehaviour
 
 
 
+        trialBufferSec = 2f; // extra recording time after guide reaches endpoint
         preTrialsec = .5f; // time before trial starts, to show ready state.
         targDurationsec = 0.3f; // used by CalculateStimTimes for onset scheduling (comparison tone duration + buffer)
         responseWindow = 0.8f; // time to respond after target onset.

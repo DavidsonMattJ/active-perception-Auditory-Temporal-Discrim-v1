@@ -237,12 +237,12 @@ public class runExperiment : MonoBehaviour
         // Update staircase (skip during standing-still practice trials)
         if (trialCount >= expParams.nstandingStilltrials)
         {
-            string condition = GetConditionLabel(expParams.trialD.blockType);
+            string condition = GetConditionLabel(expParams.trialD.blockType, evt.isShorter);
 
             if (condition != null)
             {
                 float nextDelta = adaptiveStaircase.ProcessResponse(condition, isCorrect);
-                makeAuditoryStimulus.SetRatio(nextDelta);
+                makeAuditoryStimulus.SetRatio(nextDelta, evt.isShorter);
 
                 Debug.Log($"[Staircase:{condition}] {(isCorrect ? "✓" : "✗")} → Next delta: {nextDelta:F1}ms");
             }
@@ -271,12 +271,12 @@ public class runExperiment : MonoBehaviour
 
         if (trialCount >= expParams.nstandingStilltrials)
         {
-            string condition = GetConditionLabel(expParams.trialD.blockType);
+            string condition = GetConditionLabel(expParams.trialD.blockType, evt.isShorter);
 
             if (condition != null)
             {
                 float nextDelta = adaptiveStaircase.ProcessResponse(condition, false);
-                makeAuditoryStimulus.SetRatio(nextDelta);
+                makeAuditoryStimulus.SetRatio(nextDelta, evt.isShorter);
 
                 Debug.Log($"[Staircase:{condition}] ✗ (miss) → Next delta: {nextDelta:F1}ms");
             }
@@ -366,7 +366,7 @@ public class runExperiment : MonoBehaviour
         //Establish (this trial) specific parameters:
         blockType = expParams.blockTypeArray[trialCount, 2]; //third column [0,1,2].
 
-        thisTrialDuration = expParams.walkDuration; // all trials the same duration now, distance varies instead.
+        thisTrialDuration = expParams.walkDuration + expParams.trialBufferSec; // buffer keeps recording after guide stops
 
         //query if stationary (restricts movement guide)
         isStationary = blockType == 0;
@@ -441,13 +441,14 @@ public class runExperiment : MonoBehaviour
     ///
     /// Returns null for blockType 0 in Mode A (those are practice-only stationary trials).
     /// </summary>
-    string GetConditionLabel(int blockType)
+    string GetConditionLabel(int blockType, bool isShorter)
     {
+        string direction = isShorter ? "shorter" : "longer";
         switch (blockType)
         {
-            case 0: return expParams.stationaryVsNatural ? "stationary" : null;
-            case 1: return "slow";
-            case 2: return "natural";
+            case 0: return expParams.stationaryVsNatural ? $"stationary_{direction}" : null;
+            case 1: return $"slow_{direction}";
+            case 2: return $"natural_{direction}";
             default: return null;
         }
     }

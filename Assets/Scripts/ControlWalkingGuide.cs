@@ -269,9 +269,9 @@ public class controlWalkingGuide : MonoBehaviour
         Debug.Log("moving now....");
 
         // note that the default DOMove contains 'quad' easing, which is asymmetric at start and end.
-        // Use remaining trial time so the guide arrives exactly when the trial ends,
-        // regardless of how long the pre-walk standard sequence took.
-        float remainingTime = Mathf.Max(0.1f, runExperiment.thisTrialDuration - runExperiment.trialTime);
+        // Use walkDuration (not thisTrialDuration) so the guide arrives at the endpoint
+        // at the end of the walk, before the recording buffer expires.
+        float remainingTime = Mathf.Max(0.1f, expParams.walkDuration - runExperiment.trialTime);
         walkingGuide.transform.DOMove(endPoint, remainingTime).SetEase(Ease.Linear);
 
 

@@ -53,9 +53,9 @@ public class ShowText : MonoBehaviour
             [TextType.CalibrationComplete] = "", //dynamically updated below
 
             [TextType.TrialStart] = "", //dynamically updated with trial/block index below
-            // ... add other strings
-
-
+            [TextType.ExperimentComplete] = "", //dynamically set in UpdateText
+            [TextType.StandingInstructions] = "",
+            [TextType.WalkingInstructions] = "",
         };
         isInitialized=true; // mark as ready
 
