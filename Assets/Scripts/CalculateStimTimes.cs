@@ -33,7 +33,7 @@ public class CalculateStimTimes : MonoBehaviour
     // Scripts referenced
 
     experimentParameters expParams;
-    
+    [SerializeField] MakeAuditoryStimulus makeAuditoryStimulus; // assign StimulusScreen in Inspector
     RecordData recordData;
     runExperiment runExp;
 
@@ -47,6 +47,8 @@ public class CalculateStimTimes : MonoBehaviour
         expParams = GetComponent<experimentParameters>();
         recordData = GetComponent<RecordData>();
         runExp = GetComponent<runExperiment>();
+        if (makeAuditoryStimulus == null)
+            Debug.LogError("CalculateStimTimes: MakeAuditoryStimulus not assigned in Inspector.");
 
     }
 
@@ -82,7 +84,9 @@ public class CalculateStimTimes : MonoBehaviour
             // NOTE WELL - tTotal in this script is equal to tWalk in walkParams (not tTotal in walk Params)
             // byt this stage tWalk has been calculated either based on 
             // walk calibration or default values in the case of !calibrateWalk.
-            tTotal = expParams.walkDuration;
+            // Subtract standard sequence duration so onsets are budgeted against
+            // the walk phase only, not the pre-walk standard tone playback.
+            tTotal = expParams.walkDuration - makeAuditoryStimulus.GetStandardSequenceDuration();
 
             float prejit = Random.Range(0f, 1f);    // In addition to the preTrial buffer, so the first presentation time is expPamarams.preTrialSec + preJit)
 
