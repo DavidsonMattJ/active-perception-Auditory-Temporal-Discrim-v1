@@ -129,7 +129,7 @@ public class experimentParameters : MonoBehaviour
         // now adjusting distance instead, so that the duration is matched for each participant after calibration.
          distanceBetweenZones = Vector3.Distance(startZone.transform.position, endZone.transform.position); // metres
         //use this  as default before walk calibration:
-        defaultMaxSpeed =1.2f; // m/s (fast-ish)
+        defaultMaxSpeed =1.1f; // m/s (fast-ish)
         slowSpdPcnt= 0.6f;
         normSpeed = defaultMaxSpeed;
         slowSpeed = normSpeed * slowSpdPcnt; // e.g.  80% of normal speed.
@@ -138,7 +138,7 @@ public class experimentParameters : MonoBehaviour
 
 
 
-        trialBufferSec = 2f; // extra recording time after guide reaches endpoint
+        trialBufferSec = 0.5f; // extra recording time after guide reaches endpoint
         preTrialsec = .5f; // time before trial starts, to show ready state.
         targDurationsec = 0.3f; // used by CalculateStimTimes for onset scheduling (comparison tone duration + buffer)
         responseWindow = 0.8f; // time to respond after target onset.

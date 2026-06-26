@@ -41,6 +41,7 @@ public class runExperiment : MonoBehaviour
     public bool isStationary, collectTrialSummary, collectEventSummary, hasResponded;
     
     bool SetUpSession;
+    bool endisHidden;
 
     //todo
     //public bool forceheightCalibration;
@@ -68,7 +69,6 @@ public class runExperiment : MonoBehaviour
     [SerializeField] GameObject StimulusScreen;
     [SerializeField] GameObject ListenTextObject;  // assign in Inspector
     
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -95,7 +95,7 @@ public class runExperiment : MonoBehaviour
 
         trialCount = 0;
         trialinProgress = false;
-
+        endisHidden=false; // flag for hiding WG at trial end, to avoid approaching stationary object.
         trialTime = 0f;
         collectEventSummary = false; // send info after each target to csv file.
 
@@ -165,9 +165,17 @@ public class runExperiment : MonoBehaviour
         if (trialinProgress)
         {
             trialTime += Time.deltaTime; // increment timer.
-
+           
+            //add an extra hide to make end of trial smoother. // proportion of buffer so that all responses have likely been made
+            if (trialTime > (expParams.walkDuration+expParams.trialBufferSec*.75f) && endisHidden==false)
+            {
+                // perform only once
+                controlWalkingGuide.setGuidetoHidden();
+                endisHidden=true;
+            }
             if (trialTime > thisTrialDuration)
             {
+                endisHidden=false; // reset for next
                 trialPackDown(); // includes trial incrementer
                 trialCount++;
             }
@@ -412,7 +420,8 @@ public class runExperiment : MonoBehaviour
         Debug.Log("End of Trial " + (trialCount + 1));
 
         RecordData.recordPhase = RecordData.phase.stop;
-
+        
+        controlWalkingGuide.updateScreenHeight();
         trialinProgress = false;
         trialTime = 0f;
         makeAuditoryStimulus.StopAllAudio();

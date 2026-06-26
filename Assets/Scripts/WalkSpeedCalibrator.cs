@@ -299,6 +299,9 @@ public class WalkSpeedCalibrator : MonoBehaviour
         
         normSpeed = experimentParameters.distanceBetweenZones / walkDuration; // m/s
                                                                               // clamp if too fast:
+         // reduce slightly to account for dual-task
+         normSpeed= normSpeed * 0.9f; 
+         
         if (normSpeed > experimentParameters.defaultMaxSpeed)
         {
             normSpeed = experimentParameters.defaultMaxSpeed;
